@@ -468,7 +468,7 @@ function confirmAndAdd(){
     properties:{'Design Notes':note,'Layout':LAYOUTS[S.layoutIdx].label,'Line 1':t.l1||'','Line 2':t.l2||'','Photo uploaded':t.img?'Yes':'No'}
   };
   function fail(){b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;alert('Sorry, there was an error adding to cart. Please try again.');}
-  function success(){b.textContent='✓ Added to cart!';b.style.background='#2e9e6b';setTimeout(function(){try{window.top.location.href='/cart';}catch(e){window.location.href='/cart';}},1500);}
+  function success(){b.textContent='✓ Added to cart!';b.style.background='#2e9e6b';if(!inIframe){setTimeout(function(){window.location.href='/cart';},1500);}}
   var inIframe=false;
   try{ inIframe=(window.parent && window.parent!==window); }catch(e){ inIframe=true; }
   if(inIframe){
