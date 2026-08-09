@@ -517,18 +517,18 @@ function confirmAndAdd(){
   function addToShopifyCart(imageUrl){
     b.textContent='Adding to cart...';
     var t=S.toppers[0];
-    var note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+(t.l1font||'default');
+    var fontClean=(t.l1font||'Dancing Script').replace(/'/g,'').replace(/,.*$/,'').trim();
+    var note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+fontClean;
     var payload={
       variantId:SHOPIFY_VARIANT_ID,
       quantity:1,
       properties:{
-        'Design Preview':imageUrl,
-        'Print File':imageUrl,
+        '_Design URL':imageUrl,
+        '_Design Notes':note,
         'Layout':LAYOUTS[S.layoutIdx].label,
         'Line 1':t.l1||'(none)',
         'Line 2':t.l2||'(none)',
-        'Font':t.l1font||'Dancing Script',
-        'Design Notes':note
+        'Font':fontClean
       }
     };
     function fail(){b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;alert('Sorry, there was an error adding to cart. Please try again.');}
