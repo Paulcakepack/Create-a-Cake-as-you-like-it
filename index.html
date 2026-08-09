@@ -25,15 +25,15 @@ body.embedded{background:#fff}
 .pnl.a{display:block}
 @media(max-width:480px){
   .wrap{grid-template-columns:1fr;min-height:auto;position:relative}
-  .pv{width:100%!important;padding:4px;order:1;min-height:calc(100vh - 92px)}
+  .pv{width:100%!important;padding:4px 4px 80px 4px;order:1;min-height:calc(100vh - 92px)}
   .cw-wrap{max-width:100%;margin:0 auto;width:100%}
-  .side{position:fixed;bottom:0;left:0;right:0;z-index:200;height:auto;max-height:80vh;background:#fff;border-right:none;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(233,30,140,0.25);overflow-y:auto;transform:translateY(calc(100% - 56px));transition:transform .35s cubic-bezier(.4,0,.2,1);order:2}
+  .side{position:fixed;bottom:0;left:0;right:0;z-index:200;height:auto;max-height:calc(80vh - 60px);background:#fff;border-right:none;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(233,30,140,0.25);overflow-y:auto;transform:translateY(calc(100% - 56px));transition:transform .35s cubic-bezier(.4,0,.2,1);order:2;padding-bottom:80px}
   .side.open{transform:translateY(0)}
   .side::before{display:none}
   .drawer-toggle{display:flex!important;position:sticky;top:0;left:0;right:0;width:100%;padding:14px 20px;background:var(--pk);border:none;cursor:pointer;align-items:center;justify-content:center;gap:10px;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:900;color:#fff;letter-spacing:.03em;border-radius:16px 16px 0 0;z-index:1;touch-action:manipulation;box-shadow:none}
   .drawer-toggle .arrow{font-size:20px;transition:transform .3s;color:#fff}
   .side.open .drawer-toggle .arrow{transform:rotate(180deg)}
-  .mobile-sticky-nav{display:flex!important;position:sticky;bottom:0;left:0;right:0;padding:10px 14px 14px;background:#fff;border-top:2px solid var(--pklt);gap:8px;z-index:2;box-shadow:0 -4px 12px rgba(233,30,140,0.08)}
+  .mobile-sticky-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;padding:10px 14px calc(14px + env(safe-area-inset-bottom, 0px));background:#fff;border-top:2px solid var(--pklt);gap:8px;z-index:250;box-shadow:0 -4px 12px rgba(233,30,140,0.15)}
   .mobile-sticky-nav .bk{flex:1;padding:13px 8px;font-size:13px}
   .mobile-sticky-nav .nx{flex:2;padding:13px 8px;font-size:13px}
   .desktop-nav{display:none!important}
