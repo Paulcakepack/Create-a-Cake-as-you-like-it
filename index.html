@@ -1182,6 +1182,14 @@ function fillSum(){
     var l2b=ge('smL2');if(l2b)l2b.textContent=t.l2||'—';
   }
 }
+
+/* ════════════════════════════════
+   ADD TO CART — iframe-aware
+   If running inside an iframe on sugarsisters.ie, hand the request
+   off to the parent page via postMessage. The parent listens and
+   does the POST to /cart/add.js on its own origin (where cookies work).
+   If running standalone, fall back to a direct POST.
+════════════════════════════════ */
 function confirmAndAdd(){
   if(!confirm('Are you happy with your design?\n\nOnce added to cart your topper will be printed exactly as shown. We cannot make changes after the order is placed.')){return;}
   var b=ge('atcBtn');
@@ -1189,10 +1197,8 @@ function confirmAndAdd(){
   b.style.background='#aaa';
   b.disabled=true;
 
-  /* get canvas image as base64 */
+  /* build design summary */
   var imgData=CV.toDataURL('image/png');
-
-  /* add to Shopify cart with design note */
   var t=S.toppers[0];
   var note='Layout: '+LAYOUTS[S.layoutIdx].label+
     ' | Line 1: '+(t.l1||'none')+
@@ -1200,43 +1206,84 @@ function confirmAndAdd(){
     ' | Font: '+(t.l1font||'default')+
     ' | Photo: '+(t.img?'Yes':'No');
 
+  var payload={
+    variantId:16030526931293,
+    quantity:1,
+    imgData:imgData,
+    properties:{
+      'Design Notes':note,
+      'Layout':LAYOUTS[S.layoutIdx].label,
+      'Line 1':t.l1||'',
+      'Line 2':t.l2||'',
+      'Photo uploaded':t.img?'Yes':'No'
+    }
+  };
+
+  function fail(){
+    b.textContent='ADD TO CART — €5.00';
+    b.style.background='';
+    b.disabled=false;
+    alert('Sorry, there was an error adding to cart. Please try again.');
+  }
+  function success(){
+    b.textContent='✓ Added to cart!';
+    b.style.background='#2e9e6b';
+    setTimeout(function(){
+      try{window.top.location.href='/cart';}
+      catch(e){window.location.href='/cart';}
+    },1500);
+  }
+
+  /* detect iframe */
+  var inIframe=false;
+  try{ inIframe=(window.parent && window.parent!==window); }catch(e){ inIframe=true; }
+
+  if(inIframe){
+    /* listener for parent's response */
+    var handler=function(ev){
+      if(!ev.data||ev.data.type!=='cake-cart-result')return;
+      window.removeEventListener('message',handler);
+      if(timer)clearTimeout(timer);
+      if(ev.data.ok)success();
+      else fail();
+    };
+    window.addEventListener('message',handler);
+    /* safety timeout in case parent never replies */
+    var timer=setTimeout(function(){
+      window.removeEventListener('message',handler);
+      fail();
+    },10000);
+    /* send request to parent */
+    try{
+      window.parent.postMessage({type:'cake-add-to-cart',payload:payload},'*');
+    }catch(e){
+      window.removeEventListener('message',handler);
+      clearTimeout(timer);
+      fail();
+    }
+    return;
+  }
+
+  /* standalone (not in iframe) — direct POST */
   fetch('/cart/add.js',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       items:[{
-        id:16030526931293,
+        id:payload.variantId,
         quantity:1,
-        properties:{
-          'Design Notes':note,
-          'Layout':LAYOUTS[S.layoutIdx].label,
-          'Line 1':t.l1||'',
-          'Line 2':t.l2||'',
-          'Photo uploaded':t.img?'Yes':'No'
-        }
+        properties:payload.properties
       }]
     })
   })
   .then(function(r){return r.json();})
   .then(function(data){
-    if(data.items||data.id){
-      b.textContent='✓ Added to cart!';
-      b.style.background='#2e9e6b';
-      /* redirect to cart after 1.5 seconds */
-      setTimeout(function(){
-        window.top.location.href='/cart';
-      },1500);
-    } else {
-      throw new Error('Cart error');
-    }
+    if(data.items||data.id)success();
+    else throw new Error('Cart error');
   })
-  .catch(function(){
-    b.textContent='ADD TO CART — €5.00';
-    b.style.background='';
-    b.disabled=false;
-    alert('Sorry, there was an error adding to cart. Please try again.');
-  });
+  .catch(fail);
 }
+
 function ge(id){return document.getElementById(id);}
 
 /* ── MOBILE DRAWER ── */
