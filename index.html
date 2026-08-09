@@ -382,6 +382,10 @@ body.embedded{background:#fff}
 /* Shopify variant ID for Edible Prints - No editing product */
 var SHOPIFY_VARIANT_ID = 65528494784861;
 
+/* Cloudinary config for design image uploads */
+var CLOUDINARY_CLOUD_NAME = 'zxrbfidt';
+var CLOUDINARY_UPLOAD_PRESET = 'sugarsisters_toppers';
+
 function mkTopper(){return{img:null,imgX:0,imgY:0,imgZoom:1,sizePct:99,rot:0,l1:'',l2:'',l1font:"'Dancing Script',cursive",l2font:"'Dancing Script',cursive",l1color:'#e91e8c',l2color:'#1565c0',l1outline:'none',l2outline:'none',l1fs:36,l2fs:26,l1curve:0,l2curve:0,l1bend:0,l2bend:0,l1x:244,l1y:200,l2x:244,l2y:245,l1preset:0,l2preset:0};}
 var S={layoutIdx:0,activeTopper:0,activeLayer:'img',toppers:[mkTopper(),mkTopper()]};
 function T(){return S.toppers[S.activeTopper];}
@@ -452,33 +456,95 @@ function resetText(){if(!confirm('Clear all text?'))return;saveHist();S.toppers.
 function go(n){saveHist();['pn0','pn1','pn2'].forEach(function(id,i){var el=ge(id);if(el)el.classList.toggle('a',i===n);});for(var i=0;i<3;i++){var s=ge('st'+i);if(!s)continue;s.classList.remove('a','d');if(i===n)s.classList.add('a');else if(i<n)s.classList.add('d');}if(n===2)fillSum();window.scrollTo(0,0);draw();updateMobileNav();}
 function fillSum(){var L=LAYOUTS[S.layoutIdx];var el=ge('smL');if(el)el.textContent=L.label;if(L.twoUp){var im=ge('smIm');if(im)im.textContent=(S.toppers[0].img?'T1 ✓':'T1 —')+' '+(S.toppers[1].img?'T2 ✓':'T2 —');var l1=ge('smL1');if(l1)l1.textContent=(S.toppers[0].l1||'—')+' / '+(S.toppers[1].l1||'—');var l2=ge('smL2');if(l2)l2.textContent=(S.toppers[0].l2||'—')+' / '+(S.toppers[1].l2||'—');}else{var t=S.toppers[0];var im2=ge('smIm');if(im2)im2.textContent=t.img?'✓ Uploaded':'No photo';var l1b=ge('smL1');if(l1b)l1b.textContent=t.l1||'—';var l2b=ge('smL2');if(l2b)l2b.textContent=t.l2||'—';}}
 
+function renderHighRes(){
+  var scale=5;
+  var hiCV=document.createElement('canvas');
+  hiCV.width=CW*scale;
+  hiCV.height=CH*scale;
+  var origCV=CV, origCX=CX;
+  CV=hiCV;
+  CX=hiCV.getContext('2d');
+  CX.scale(scale,scale);
+  draw();
+  CV=origCV;
+  CX=origCX;
+  return hiCV.toDataURL('image/jpeg',0.92);
+}
+
+function uploadToCloudinary(dataUrl,onDone,onFail){
+  var arr=dataUrl.split(',');
+  var mime=arr[0].match(/:(.*?);/)[1];
+  var bstr=atob(arr[1]);
+  var n=bstr.length;
+  var u8arr=new Uint8Array(n);
+  while(n--){u8arr[n]=bstr.charCodeAt(n);}
+  var blob=new Blob([u8arr],{type:mime});
+  var formData=new FormData();
+  formData.append('file',blob,'topper-'+Date.now()+'.jpg');
+  formData.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+  fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/image/upload',{method:'POST',body:formData})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.secure_url)onDone(data.secure_url);
+      else onFail(new Error(data.error&&data.error.message?data.error.message:'Upload failed'));
+    })
+    .catch(function(err){onFail(err);});
+}
+
 function confirmAndAdd(){
   if(!confirm('Are you happy with your design?\n\nOnce added to cart your topper will be printed exactly as shown. We cannot make changes after the order is placed.')){return;}
   var b=ge('atcBtn');
-  b.textContent='Adding to cart...';
-  b.style.background='#aaa';
   b.disabled=true;
-  var imgData=CV.toDataURL('image/png');
-  var t=S.toppers[0];
-  var note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+(t.l1font||'default')+' | Photo: '+(t.img?'Yes':'No');
-  var payload={
-    variantId:SHOPIFY_VARIANT_ID,
-    quantity:1,
-    imgData:imgData,
-    properties:{'Design Notes':note,'Layout':LAYOUTS[S.layoutIdx].label,'Line 1':t.l1||'','Line 2':t.l2||'','Photo uploaded':t.img?'Yes':'No'}
-  };
-  function fail(){b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;alert('Sorry, there was an error adding to cart. Please try again.');}
-  function success(){b.textContent='✓ Added to cart!';b.style.background='#2e9e6b';if(!inIframe){setTimeout(function(){window.location.href='/cart';},1500);}}
-  var inIframe=false;
-  try{ inIframe=(window.parent && window.parent!==window); }catch(e){ inIframe=true; }
-  if(inIframe){
-    var handler=function(ev){if(!ev.data||ev.data.type!=='cake-cart-result')return;window.removeEventListener('message',handler);if(timer)clearTimeout(timer);if(ev.data.ok)success();else fail();};
-    window.addEventListener('message',handler);
-    var timer=setTimeout(function(){window.removeEventListener('message',handler);fail();},10000);
-    try{window.parent.postMessage({type:'cake-add-to-cart',payload:payload},'*');}catch(e){window.removeEventListener('message',handler);clearTimeout(timer);fail();}
+  b.style.background='#aaa';
+  b.textContent='Preparing your design...';
+
+  var hiResDataUrl;
+  try{hiResDataUrl=renderHighRes();}
+  catch(e){
+    b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;
+    alert('Sorry, could not prepare your design. Please try again.');
     return;
   }
-  fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{id:payload.variantId,quantity:1,properties:payload.properties}]})}).then(function(r){return r.json();}).then(function(data){if(data.items||data.id)success();else throw new Error('Cart error');}).catch(fail);
+
+  b.textContent='Uploading your design...';
+  uploadToCloudinary(hiResDataUrl,function(cloudUrl){
+    addToShopifyCart(cloudUrl);
+  },function(err){
+    b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;
+    alert('Sorry, there was an error uploading your design. Please check your internet connection and try again.\n\nError: '+(err.message||err));
+  });
+
+  function addToShopifyCart(imageUrl){
+    b.textContent='Adding to cart...';
+    var t=S.toppers[0];
+    var note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+(t.l1font||'default');
+    var payload={
+      variantId:SHOPIFY_VARIANT_ID,
+      quantity:1,
+      properties:{
+        'Design Preview':imageUrl,
+        'Print File':imageUrl,
+        'Layout':LAYOUTS[S.layoutIdx].label,
+        'Line 1':t.l1||'(none)',
+        'Line 2':t.l2||'(none)',
+        'Font':t.l1font||'Dancing Script',
+        'Design Notes':note
+      }
+    };
+    function fail(){b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;alert('Sorry, there was an error adding to cart. Please try again.');}
+    function success(){b.textContent='✓ Added to cart!';b.style.background='#2e9e6b';if(!inIframe){setTimeout(function(){window.location.href='/cart';},1500);}}
+    var inIframe=false;
+    try{inIframe=(window.parent&&window.parent!==window);}catch(e){inIframe=true;}
+    if(inIframe){
+      var timer;
+      var handler=function(ev){if(!ev.data||ev.data.type!=='cake-cart-result')return;window.removeEventListener('message',handler);if(timer)clearTimeout(timer);if(ev.data.ok)success();else fail();};
+      window.addEventListener('message',handler);
+      timer=setTimeout(function(){window.removeEventListener('message',handler);fail();},10000);
+      try{window.parent.postMessage({type:'cake-add-to-cart',payload:payload},'*');}catch(e){window.removeEventListener('message',handler);clearTimeout(timer);fail();}
+      return;
+    }
+    fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{id:payload.variantId,quantity:1,properties:payload.properties}]})}).then(function(r){return r.json();}).then(function(data){if(data.items||data.id)success();else throw new Error('Cart error');}).catch(fail);
+  }
 }
 
 function ge(id){return document.getElementById(id);}
