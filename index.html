@@ -46,6 +46,10 @@ body.embedded{background:#fff}
   .side.open ~ .fab-tools, .side.open + .fab-tools{display:none!important}
   @keyframes fabPulse{0%,100%{box-shadow:0 4px 16px rgba(233,30,140,0.5)}50%{box-shadow:0 6px 24px rgba(233,30,140,0.75)}}
   @keyframes fabBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  body.step-0 .pv{display:none!important}
+  body.step-0 .side{position:static!important;max-height:none!important;transform:none!important;box-shadow:none!important;border-radius:0!important;padding-bottom:100px!important}
+  body.step-0 .drawer-toggle{display:none!important}
+  body.step-0 .fab-tools{display:none!important}
   @keyframes hintfade{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
 }
 .sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#333;margin:12px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--pklt)}
@@ -465,7 +469,7 @@ function cvUp(e){if(_drag.active||_pinch.active)saveHist();_drag.active=false;_p
 function resetImages(){if(!confirm('Clear all uploaded photos?'))return;saveHist();S.toppers.forEach(function(t){t.img=null;t.imgX=0;t.imgY=0;t.imgZoom=1;t.rot=0;t.sizePct=100;});var fi=ge('fiMain');if(fi)fi.value='';showUploadZone();var zl=ge('zoomLbl');if(zl)zl.textContent='100%';draw();}
 function resetText(){if(!confirm('Clear all text?'))return;saveHist();S.toppers.forEach(function(t){t.l1='';t.l2='';t.l1x=244;t.l1y=200;t.l2x=244;t.l2y=245;t.l1outline='none';t.l2outline='none';t.l1curve=0;t.l1bend=0;t.l2curve=0;t.l2bend=0;});S_archDir={l1:0,l2:0};var inp=ge('inTxt');if(inp)inp.value='';var cb=ge('clearBtnTxt');if(cb)cb.style.display='none';syncArchBtns('l1');syncArchBtns('l2');draw();}
 
-function go(n){saveHist();['pn0','pn1','pn2'].forEach(function(id,i){var el=ge(id);if(el)el.classList.toggle('a',i===n);});for(var i=0;i<3;i++){var s=ge('st'+i);if(!s)continue;s.classList.remove('a','d');if(i===n)s.classList.add('a');else if(i<n)s.classList.add('d');}if(n===2)fillSum();window.scrollTo(0,0);draw();updateMobileNav();var fab=ge('fabTools');if(fab)fab.style.display=(isMobile()&&n===1&&!_drawerOpen)?'flex':'none';}
+function go(n){saveHist();['pn0','pn1','pn2'].forEach(function(id,i){var el=ge(id);if(el)el.classList.toggle('a',i===n);});for(var i=0;i<3;i++){var s=ge('st'+i);if(!s)continue;s.classList.remove('a','d');if(i===n)s.classList.add('a');else if(i<n)s.classList.add('d');}document.body.className=document.body.className.replace(/\bstep-\d\b/g,'').trim()+' step-'+n;if(n===2)fillSum();window.scrollTo(0,0);draw();updateMobileNav();var fab=ge('fabTools');if(fab)fab.style.display=(isMobile()&&n===1&&!_drawerOpen)?'flex':'none';}
 function fillSum(){var L=LAYOUTS[S.layoutIdx];var el=ge('smL');if(el)el.textContent=L.label;if(L.twoUp){var im=ge('smIm');if(im)im.textContent=(S.toppers[0].img?'T1 ✓':'T1 —')+' '+(S.toppers[1].img?'T2 ✓':'T2 —');var l1=ge('smL1');if(l1)l1.textContent=(S.toppers[0].l1||'—')+' / '+(S.toppers[1].l1||'—');var l2=ge('smL2');if(l2)l2.textContent=(S.toppers[0].l2||'—')+' / '+(S.toppers[1].l2||'—');}else{var t=S.toppers[0];var im2=ge('smIm');if(im2)im2.textContent=t.img?'✓ Uploaded':'No photo';var l1b=ge('smL1');if(l1b)l1b.textContent=t.l1||'—';var l2b=ge('smL2');if(l2b)l2b.textContent=t.l2||'—';}}
 
 function renderHighRes(){
@@ -599,7 +603,7 @@ window.addEventListener('load',function(){
   document.addEventListener('touchend',function(e){if(!_drag.active&&!_pinch.active)return;cvUp(e);});
   document.addEventListener('touchcancel',function(){_drag.active=false;_pinch.active=false;});
   document.addEventListener('touchstart',function(e){if((_drag.active||_pinch.active)&&e.touches&&e.touches.length>=2){e.preventDefault();_pinch.active=true;_drag.active=false;_pinch.startDist=pinchDist(e);_pinch.startZoom=T().imgZoom||1;}},{passive:false});
-  setTimeout(function(){drawPreviews();var lo0=ge('lo0');if(lo0)pickLayout(lo0,0);saveHist();syncArchBtns('l1');syncArchBtns('l2');syncTools();updateZoomLbl();draw();showUploadZone();initMobile();},80);
+  setTimeout(function(){document.body.classList.add('step-0');drawPreviews();var lo0=ge('lo0');if(lo0)pickLayout(lo0,0);saveHist();syncArchBtns('l1');syncArchBtns('l2');syncTools();updateZoomLbl();draw();showUploadZone();initMobile();},80);
 });
 </script>
 </body>
