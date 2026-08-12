@@ -41,6 +41,11 @@ body.embedded{background:#fff}
   .hdr svg{height:30px}
   .st b{font-size:13px}
   .mobile-hint{display:block!important;text-align:center;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.45);border-radius:20px;padding:5px 14px;position:absolute;bottom:70px;left:50%;transform:translateX(-50%);white-space:nowrap;animation:hintfade 4s ease forwards;pointer-events:none;z-index:10}
+  .fab-tools{display:flex!important;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:150;background:var(--pk);color:#fff;border:none;padding:14px 24px;border-radius:30px;font-family:'Nunito',Arial,sans-serif;font-size:15px;font-weight:900;letter-spacing:.03em;box-shadow:0 4px 16px rgba(233,30,140,0.5);cursor:pointer;align-items:center;gap:8px;animation:fabPulse 2s ease-in-out infinite;touch-action:manipulation}
+  .fab-tools .fab-arrow{font-size:18px;animation:fabBounce 1.5s ease-in-out infinite}
+  .side.open ~ .fab-tools, .side.open + .fab-tools{display:none!important}
+  @keyframes fabPulse{0%,100%{box-shadow:0 4px 16px rgba(233,30,140,0.5)}50%{box-shadow:0 6px 24px rgba(233,30,140,0.75)}}
+  @keyframes fabBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
   @keyframes hintfade{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
 }
 .sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#333;margin:12px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--pklt)}
@@ -378,6 +383,12 @@ body.embedded{background:#fff}
 </div>
 </div>
 
+<button class="fab-tools" id="fabTools" onclick="openDrawer()" style="display:none">
+  <span class="fab-arrow">▲</span>
+  <span>Design Tools</span>
+  <span class="fab-arrow">▲</span>
+</button>
+
 <script>
 /* Shopify variant ID for Edible Prints - No editing product */
 var SHOPIFY_VARIANT_ID = 65528494784861;
@@ -454,22 +465,33 @@ function cvUp(e){if(_drag.active||_pinch.active)saveHist();_drag.active=false;_p
 function resetImages(){if(!confirm('Clear all uploaded photos?'))return;saveHist();S.toppers.forEach(function(t){t.img=null;t.imgX=0;t.imgY=0;t.imgZoom=1;t.rot=0;t.sizePct=100;});var fi=ge('fiMain');if(fi)fi.value='';showUploadZone();var zl=ge('zoomLbl');if(zl)zl.textContent='100%';draw();}
 function resetText(){if(!confirm('Clear all text?'))return;saveHist();S.toppers.forEach(function(t){t.l1='';t.l2='';t.l1x=244;t.l1y=200;t.l2x=244;t.l2y=245;t.l1outline='none';t.l2outline='none';t.l1curve=0;t.l1bend=0;t.l2curve=0;t.l2bend=0;});S_archDir={l1:0,l2:0};var inp=ge('inTxt');if(inp)inp.value='';var cb=ge('clearBtnTxt');if(cb)cb.style.display='none';syncArchBtns('l1');syncArchBtns('l2');draw();}
 
-function go(n){saveHist();['pn0','pn1','pn2'].forEach(function(id,i){var el=ge(id);if(el)el.classList.toggle('a',i===n);});for(var i=0;i<3;i++){var s=ge('st'+i);if(!s)continue;s.classList.remove('a','d');if(i===n)s.classList.add('a');else if(i<n)s.classList.add('d');}if(n===2)fillSum();window.scrollTo(0,0);draw();updateMobileNav();}
+function go(n){saveHist();['pn0','pn1','pn2'].forEach(function(id,i){var el=ge(id);if(el)el.classList.toggle('a',i===n);});for(var i=0;i<3;i++){var s=ge('st'+i);if(!s)continue;s.classList.remove('a','d');if(i===n)s.classList.add('a');else if(i<n)s.classList.add('d');}if(n===2)fillSum();window.scrollTo(0,0);draw();updateMobileNav();var fab=ge('fabTools');if(fab)fab.style.display=(isMobile()&&n===1&&!_drawerOpen)?'flex':'none';}
 function fillSum(){var L=LAYOUTS[S.layoutIdx];var el=ge('smL');if(el)el.textContent=L.label;if(L.twoUp){var im=ge('smIm');if(im)im.textContent=(S.toppers[0].img?'T1 ✓':'T1 —')+' '+(S.toppers[1].img?'T2 ✓':'T2 —');var l1=ge('smL1');if(l1)l1.textContent=(S.toppers[0].l1||'—')+' / '+(S.toppers[1].l1||'—');var l2=ge('smL2');if(l2)l2.textContent=(S.toppers[0].l2||'—')+' / '+(S.toppers[1].l2||'—');}else{var t=S.toppers[0];var im2=ge('smIm');if(im2)im2.textContent=t.img?'✓ Uploaded':'No photo';var l1b=ge('smL1');if(l1b)l1b.textContent=t.l1||'—';var l2b=ge('smL2');if(l2b)l2b.textContent=t.l2||'—';}}
 
 function renderHighRes(){
   var scale=5;
   var hiCV=document.createElement('canvas');
-  hiCV.width=CW*scale;
-  hiCV.height=CH*scale;
+  var isCupcakeSheet = S.layoutIdx === 3;
   var origCV=CV, origCX=CX;
-  CV=hiCV;
-  CX=hiCV.getContext('2d');
-  CX.scale(scale,scale);
+  if(isCupcakeSheet){
+    hiCV.width = 488 * scale;
+    hiCV.height = 700 * scale;
+    CV = hiCV;
+    CX = hiCV.getContext('2d');
+    CX.translate(488 * scale, 0);
+    CX.rotate(Math.PI/2);
+    CX.scale(scale, scale);
+  } else {
+    hiCV.width = CW * scale;
+    hiCV.height = CH * scale;
+    CV = hiCV;
+    CX = hiCV.getContext('2d');
+    CX.scale(scale, scale);
+  }
   draw();
-  CV=origCV;
-  CX=origCX;
-  return hiCV.toDataURL('image/jpeg',0.92);
+  CV = origCV;
+  CX = origCX;
+  return hiCV.toDataURL('image/jpeg', 0.92);
 }
 
 function uploadToCloudinary(dataUrl,onDone,onFail){
@@ -550,14 +572,16 @@ function confirmAndAdd(){
 
 function ge(id){return document.getElementById(id);}
 var _drawerOpen=false;
-function toggleDrawer(){_drawerOpen=!_drawerOpen;var side=ge('sideDrawer');if(side){side.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';side.classList.toggle('open',_drawerOpen);side.style.removeProperty('transform');}ge('drawerLabel').textContent='⋮⋮ Drag for more options';}
+function toggleDrawer(){_drawerOpen=!_drawerOpen;var side=ge('sideDrawer');if(side){side.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';side.classList.toggle('open',_drawerOpen);side.style.removeProperty('transform');}ge('drawerLabel').textContent='⋮⋮ Drag for more options';updateFab();}
+function openDrawer(){if(_drawerOpen)return;_drawerOpen=true;var side=ge('sideDrawer');if(side){side.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';side.classList.add('open');side.style.removeProperty('transform');}var lbl=ge('drawerLabel');if(lbl)lbl.textContent='⋮⋮ Drag for more options';updateFab();}
+function updateFab(){var fab=ge('fabTools');if(!fab)return;if(!isMobile()){fab.style.display='none';return;}fab.style.display=_drawerOpen?'none':'flex';}
 function initDrawerDrag(){var toggle=ge('drawerToggle');var side=ge('sideDrawer');if(!toggle||!side)return;var startY,startTranslate,dragging=false,moved=false;function getTranslate(){var style=window.getComputedStyle(side);var mat=new DOMMatrix(style.transform);return mat.m42;}function onStart(e){if(!isMobile())return;var touch=e.touches?e.touches[0]:e;startY=touch.clientY;startTranslate=getTranslate();dragging=true;moved=false;side.style.transition='none';e.stopPropagation();}function onMove(e){if(!dragging||!isMobile())return;var touch=e.touches?e.touches[0]:e;var dy=touch.clientY-startY;if(Math.abs(dy)>4)moved=true;var newY=Math.max(-window.innerHeight*0.85,Math.min(window.innerHeight*0.88,startTranslate+dy));side.style.transform='translateY('+newY+'px)';e.preventDefault();}function onEnd(e){if(!dragging||!isMobile())return;dragging=false;side.style.transition='';if(!moved){toggleDrawer();}var currentY=getTranslate();_drawerOpen=currentY<window.innerHeight*0.7;}toggle.addEventListener('touchstart',onStart,{passive:true});toggle.addEventListener('touchmove',onMove,{passive:false});toggle.addEventListener('touchend',onEnd);toggle.addEventListener('mousedown',onStart);window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onEnd);}
 function isMobile(){return window.innerWidth<=480;}
-function initMobile(){if(!isMobile())return;var toggle=ge('drawerToggle');var hint=ge('mobileHint');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display='flex';if(nav)nav.style.display='flex';if(hint){hint.style.display='block';setTimeout(function(){hint.style.display='none';},4500);}initDrawerDrag();updateMobileNav();}
+function initMobile(){if(!isMobile())return;var toggle=ge('drawerToggle');var hint=ge('mobileHint');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display='flex';if(nav)nav.style.display='flex';if(hint){hint.style.display='block';setTimeout(function(){hint.style.display='none';},4500);}initDrawerDrag();updateMobileNav();updateFab();}
 function updateMobileNav(){if(!isMobile())return;var nav=ge('mobileStickyNav');var bk=ge('mobBk');var nx=ge('mobNx');if(!nav||!bk||!nx)return;var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;if(step===0){bk.style.display='none';nx.textContent='Start Designing →';nx.style.flex='1';}else if(step===1){bk.style.display='';bk.textContent="← Template";nx.textContent='Finalise Order →';nx.style.background='var(--pk)';nx.style.flex='2';}else{bk.style.display='';bk.textContent='← Design';nx.textContent='ADD TO CART — €5.00';nx.style.background='#2e9e6b';nx.style.flex='2';}}
 function mobileBk(){var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;go(step-1);}
 function mobNxAction(){var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;if(step===2){confirmAndAdd();}else{go(step+1);}}
-window.addEventListener('resize',function(){var toggle=ge('drawerToggle');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display=isMobile()?'flex':'none';if(nav)nav.style.display=isMobile()?'flex':'none';if(!isMobile()){var side=ge('sideDrawer');if(side){side.classList.remove('open');side.style.removeProperty('transform');}}updateMobileNav();});
+window.addEventListener('resize',function(){var toggle=ge('drawerToggle');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display=isMobile()?'flex':'none';if(nav)nav.style.display=isMobile()?'flex':'none';if(!isMobile()){var side=ge('sideDrawer');if(side){side.classList.remove('open');side.style.removeProperty('transform');}}updateMobileNav();updateFab();});
 
 window.addEventListener('load',function(){
   CV=ge('cv');CX=CV.getContext('2d');
