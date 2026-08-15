@@ -43,23 +43,10 @@ body.embedded{background:#fff}
   .st b{font-size:13px}
   .mobile-hint{display:block!important;text-align:center;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.45);border-radius:20px;padding:5px 14px;position:absolute;bottom:70px;left:50%;transform:translateX(-50%);white-space:nowrap;animation:hintfade 4s ease forwards;pointer-events:none;z-index:10}
   .fab-tools{display:flex;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:150;background:var(--pk);color:#fff;border:none;padding:14px 24px;border-radius:30px;font-family:'Nunito',Arial,sans-serif;font-size:15px;font-weight:900;letter-spacing:.03em;box-shadow:0 4px 16px rgba(233,30,140,0.5);cursor:pointer;align-items:center;gap:8px;animation:fabPulse 2s ease-in-out infinite;touch-action:manipulation}
-  .fab-close{display:none;position:fixed;top:calc(100vh - 85vh - 22px);right:14px;z-index:260;background:#fff;color:var(--pk);border:2px solid var(--pk);width:44px;height:44px;border-radius:50%;font-size:22px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.2);touch-action:manipulation;padding:0;line-height:1}
-  .fab-close.show{display:flex}
   .fab-tools .fab-arrow{font-size:18px;animation:fabBounce 1.5s ease-in-out infinite}
   .side.open ~ .fab-tools, .side.open + .fab-tools{display:none!important}
   @keyframes fabPulse{0%,100%{box-shadow:0 4px 16px rgba(233,30,140,0.5)}50%{box-shadow:0 6px 24px rgba(233,30,140,0.75)}}
   @keyframes fabBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-  .confirm-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:400;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-  .confirm-overlay.show{display:flex}
-  .confirm-modal{background:linear-gradient(135deg,#fff0f8 0%,#ffe4f4 100%);border:2.5px solid var(--pk);border-radius:18px;padding:24px 22px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(233,30,140,0.35);text-align:center;font-family:'Nunito',Arial,sans-serif}
-  .confirm-modal-icon{font-size:44px;margin-bottom:8px}
-  .confirm-modal-title{font-size:19px;font-weight:900;color:var(--pk);margin-bottom:10px;letter-spacing:.01em}
-  .confirm-modal-body{font-size:13px;font-weight:700;color:#c0006a;line-height:1.6;margin-bottom:18px}
-  .confirm-modal-actions{display:flex;gap:10px}
-  .confirm-modal-btn{flex:1;padding:14px 10px;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;letter-spacing:.02em;border:2px solid var(--pk);touch-action:manipulation;min-height:48px}
-  .confirm-modal-btn.cancel{background:#fff;color:var(--pk)}
-  .confirm-modal-btn.confirm{background:var(--pk);color:#fff;border-color:var(--pk);flex:1.4}
-  .confirm-modal-btn:active{transform:scale(.97)}
   body.step-0 .pv{display:none!important}
   body.step-0 .side{position:static!important;max-height:none!important;transform:none!important;box-shadow:none!important;border-radius:0!important;padding-bottom:100px!important}
   body.step-0 .drawer-toggle{display:none!important}
@@ -74,6 +61,19 @@ body.embedded{background:#fff}
 .lopt:hover,.lopt.s{border-color:var(--pk);background:var(--pklt)}
 .lopt-preview{width:50px;height:70px;flex-shrink:0;border:1px solid #ccc;border-radius:3px;background:#f9f9f9;overflow:hidden;position:relative}
 .lopt-preview canvas{position:absolute;top:0;left:0;width:100%;height:100%}
+.confirm-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:400;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.confirm-overlay.show{display:flex}
+.confirm-modal{background:linear-gradient(135deg,#fff0f8 0%,#ffe4f4 100%);border:2.5px solid var(--pk);border-radius:18px;padding:24px 22px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(233,30,140,0.35);text-align:center;font-family:'Nunito',Arial,sans-serif}
+.confirm-modal-icon{font-size:44px;margin-bottom:8px}
+.confirm-modal-title{font-size:19px;font-weight:900;color:var(--pk);margin-bottom:10px;letter-spacing:.01em}
+.confirm-modal-body{font-size:13px;font-weight:700;color:#c0006a;line-height:1.6;margin-bottom:18px}
+.confirm-modal-actions{display:flex;gap:10px}
+.confirm-modal-btn{flex:1;padding:14px 10px;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;letter-spacing:.02em;border:2px solid var(--pk);touch-action:manipulation;min-height:48px}
+.confirm-modal-btn.cancel{background:#fff;color:var(--pk)}
+.confirm-modal-btn.confirm{background:var(--pk);color:#fff;border-color:var(--pk);flex:1.4}
+.confirm-modal-btn:active{transform:scale(.97)}
+.fab-close{display:none;position:fixed;top:15vh;right:14px;z-index:260;background:#fff;color:var(--pk);border:2px solid var(--pk);width:44px;height:44px;border-radius:50%;font-size:22px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.2);touch-action:manipulation;padding:0;line-height:1}
+.fab-close.show{display:flex}
 .lopt-title{font-size:13px;font-weight:900;color:#1a1a1a;margin-bottom:2px}
 .lopt-desc{font-size:10px;font-weight:700;color:var(--pk)}
 .layer-bar{display:flex;gap:4px;margin-bottom:0;padding:10px 10px 0;border-bottom:none;background:#f9f9f9;position:relative;overflow:visible}
