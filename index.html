@@ -72,6 +72,17 @@ body.embedded{background:#fff}
 .confirm-modal-btn.cancel{background:#fff;color:var(--pk)}
 .confirm-modal-btn.confirm{background:var(--pk);color:#fff;border-color:var(--pk);flex:1.4}
 .confirm-modal-btn:active{transform:scale(.97)}
+.preview-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.preview-overlay.show{display:flex}
+.preview-inner{max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+.preview-label{color:#fff;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;text-align:center;background:rgba(233,30,140,0.9);padding:6px 14px;border-radius:20px;letter-spacing:.02em}
+.preview-img{max-width:100%;max-height:calc(100vh - 180px);background:#fff;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,0.5);object-fit:contain}
+.preview-actions{display:flex;gap:10px;width:100%;max-width:420px;padding:0 4px}
+.preview-action-btn{flex:1;padding:14px 12px;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;letter-spacing:.02em;border:2px solid var(--pk);touch-action:manipulation;min-height:52px;box-shadow:0 3px 10px rgba(0,0,0,0.3)}
+.preview-action-btn.edit{background:#fff;color:var(--pk)}
+.preview-action-btn.cart{background:var(--pk);color:#fff;flex:1.4}
+.preview-action-btn:active{transform:scale(.97)}
+.preview-close{position:fixed;top:14px;right:14px;z-index:510;background:#fff;color:var(--pk);border:2px solid var(--pk);width:44px;height:44px;border-radius:50%;font-size:22px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.4);touch-action:manipulation;padding:0;line-height:1}
 .fab-close{display:none;position:fixed;top:15vh;right:14px;z-index:260;background:#fff;color:var(--pk);border:2px solid var(--pk);width:44px;height:44px;border-radius:50%;font-size:22px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.2);touch-action:manipulation;padding:0;line-height:1}
 .fab-close.show{display:flex}
 .lopt-title{font-size:13px;font-weight:900;color:#1a1a1a;margin-bottom:2px}
@@ -377,6 +388,7 @@ body.embedded{background:#fff}
       <div style="background:#fff;border:1.5px solid #f5c0d8;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--pk)">✓ Check your text</div>
     </div>
   </div>
+  <button onclick="showPrintPreview()" style="width:100%;padding:12px;background:#fff;color:var(--pk);border:2px solid var(--pk);border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:10px;touch-action:manipulation">👁 Preview my print sheet</button>
   <button class="atc" id="atcBtn" onclick="confirmAndAdd()">ADD TO CART — €5.00</button>
   <div class="nav"><button class="bk" onclick="go(1)">← Back</button></div>
 </div>
@@ -415,6 +427,18 @@ body.embedded{background:#fff}
     <div class="confirm-modal-actions">
       <button class="confirm-modal-btn cancel" onclick="hideConfirm(false)">Keep Editing</button>
       <button class="confirm-modal-btn confirm" onclick="hideConfirm(true)">Yes, Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<div class="preview-overlay" id="previewOverlay" onclick="hidePrintPreview(event)">
+  <button class="preview-close" onclick="hidePrintPreview()" aria-label="Close preview">✕</button>
+  <div class="preview-inner">
+    <div class="preview-label">This is exactly how your sheet will print on A4</div>
+    <img id="previewImg" class="preview-img" alt="Print sheet preview">
+    <div class="preview-actions">
+      <button class="preview-action-btn edit" onclick="hidePrintPreview();go(1);">← Back to edit</button>
+      <button class="preview-action-btn cart" onclick="hidePrintPreview();confirmAndAdd();">Add to cart →</button>
     </div>
   </div>
 </div>
@@ -645,6 +669,39 @@ function confirmAndAdd(){
 var _confirmCallback=null;
 function showConfirm(onConfirm){_confirmCallback=onConfirm;var ov=ge('confirmOverlay');if(ov)ov.classList.add('show');}
 function hideConfirm(proceed){var ov=ge('confirmOverlay');if(ov)ov.classList.remove('show');if(proceed&&_confirmCallback){_confirmCallback();}_confirmCallback=null;}
+
+function showPrintPreview(){
+  var imgData;
+  try{
+    _isExport=true;
+    var scale=2;
+    var pCV=document.createElement('canvas');
+    var isCupcakeSheet=S.layoutIdx===3;
+    var origCV=CV,origCX=CX;
+    if(isCupcakeSheet){
+      pCV.width=488*scale;pCV.height=700*scale;
+      CV=pCV;CX=pCV.getContext('2d');
+      CX.translate(488*scale,0);CX.rotate(Math.PI/2);CX.scale(scale,scale);
+    }else{
+      pCV.width=CW*scale;pCV.height=CH*scale;
+      CV=pCV;CX=pCV.getContext('2d');CX.scale(scale,scale);
+    }
+    draw();
+    CV=origCV;CX=origCX;
+    _isExport=false;
+    imgData=pCV.toDataURL('image/jpeg',0.85);
+  }catch(e){_isExport=false;alert('Could not generate preview.');return;}
+  var img=ge('previewImg');
+  if(img)img.src=imgData;
+  var ov=ge('previewOverlay');
+  if(ov)ov.classList.add('show');
+}
+
+function hidePrintPreview(e){
+  if(e&&e.target&&e.target.id!=='previewOverlay'&&e.target.className!=='preview-close')return;
+  var ov=ge('previewOverlay');
+  if(ov)ov.classList.remove('show');
+}
 
 function proceedWithAddToCart(){
   var b=ge('atcBtn');
