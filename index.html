@@ -647,7 +647,9 @@ function renderHighRes(){
   var scale=5;
   var hiCV=document.createElement('canvas');
   var isCupcakeSheet = S.layoutIdx === 3;
+  var is8Topper = S.layoutIdx === 0;
   var origCV=CV, origCX=CX;
+  var origCW=CW, origCH=CH;
   if(isCupcakeSheet){
     hiCV.width = 488 * scale;
     hiCV.height = 700 * scale;
@@ -655,6 +657,16 @@ function renderHighRes(){
     CX = hiCV.getContext('2d');
     CX.translate(488 * scale, 0);
     CX.rotate(Math.PI/2);
+    CX.scale(scale, scale);
+  } else if(is8Topper){
+    var oversize = 1.21;
+    var newCW = Math.round(488 * oversize);
+    var newCH = Math.round(700 * oversize);
+    hiCV.width = newCW * scale;
+    hiCV.height = newCH * scale;
+    CV = hiCV;
+    CX = hiCV.getContext('2d');
+    CW = newCW; CH = newCH;
     CX.scale(scale, scale);
   } else {
     hiCV.width = CW * scale;
@@ -668,6 +680,7 @@ function renderHighRes(){
   _isExport=false;
   CV = origCV;
   CX = origCX;
+  CW = origCW; CH = origCH;
   return hiCV.toDataURL('image/jpeg', 0.92);
 }
 
@@ -706,17 +719,28 @@ function showPrintPreview(){
     var scale=2;
     var pCV=document.createElement('canvas');
     var isCupcakeSheet=S.layoutIdx===3;
+    var is8Topper=S.layoutIdx===0;
     var origCV=CV,origCX=CX;
+    var origCW=CW,origCH=CH;
     if(isCupcakeSheet){
       pCV.width=488*scale;pCV.height=700*scale;
       CV=pCV;CX=pCV.getContext('2d');
       CX.translate(488*scale,0);CX.rotate(Math.PI/2);CX.scale(scale,scale);
+    }else if(is8Topper){
+      var oversize=1.21;
+      var newCW=Math.round(488*oversize);
+      var newCH=Math.round(700*oversize);
+      pCV.width=newCW*scale;pCV.height=newCH*scale;
+      CV=pCV;CX=pCV.getContext('2d');
+      CW=newCW;CH=newCH;
+      CX.scale(scale,scale);
     }else{
       pCV.width=CW*scale;pCV.height=CH*scale;
       CV=pCV;CX=pCV.getContext('2d');CX.scale(scale,scale);
     }
     draw();
     CV=origCV;CX=origCX;
+    CW=origCW;CH=origCH;
     _isExport=false;
     imgData=pCV.toDataURL('image/jpeg',0.85);
   }catch(e){_isExport=false;alert('Could not generate preview.');return;}
