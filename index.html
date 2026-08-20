@@ -659,7 +659,7 @@ function renderHighRes(){
     CX.rotate(Math.PI/2);
     CX.scale(scale, scale);
   } else if(is8Topper){
-    var oversize = 1.21;
+    var oversize = 1.49;
     var newCW = Math.round(488 * oversize);
     var newCH = Math.round(700 * oversize);
     hiCV.width = newCW * scale;
@@ -727,7 +727,7 @@ function showPrintPreview(){
       CV=pCV;CX=pCV.getContext('2d');
       CX.translate(488*scale,0);CX.rotate(Math.PI/2);CX.scale(scale,scale);
     }else if(is8Topper){
-      var oversize=1.21;
+      var oversize=1.49;
       var newCW=Math.round(488*oversize);
       var newCH=Math.round(700*oversize);
       pCV.width=newCW*scale;pCV.height=newCH*scale;
