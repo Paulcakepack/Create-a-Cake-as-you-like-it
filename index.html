@@ -24,10 +24,11 @@ body.embedded{background:#fff}
 .pnl{display:none;padding:10px 12px}
 .pnl.a{display:block}
 @media(max-width:480px){
-  .wrap{grid-template-columns:1fr;min-height:auto;position:relative}
-  .pv{width:100%!important;padding:4px 4px 20px 4px;order:1;background:#fff!important}
+  html,body{background:#fff!important;margin:0;padding:0}
+  .wrap{grid-template-columns:1fr;min-height:auto;position:relative;background:#fff}
+  .pv{width:100%!important;padding:4px 4px 12px 4px!important;order:1;background:#fff!important;min-height:0!important;height:auto!important;flex:0 0 auto!important}
   .cw-wrap{max-width:100%;margin:0 auto;width:100%}
-  .side{position:fixed;bottom:0;left:0;right:0;z-index:200;height:auto;max-height:85vh;background:#fff;border-right:none;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(233,30,140,0.25);overflow-y:auto;transform:translateY(calc(100% - 56px));transition:transform .35s cubic-bezier(.4,0,.2,1);order:2;padding-bottom:80px;-webkit-overflow-scrolling:touch}
+  .side{position:fixed;bottom:0;left:0;right:0;z-index:200;height:auto;max-height:85vh;background:#fff;border-right:none;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(233,30,140,0.25);overflow-y:auto;transform:translateY(0);transition:transform .35s cubic-bezier(.4,0,.2,1);order:2;padding-bottom:80px;-webkit-overflow-scrolling:touch}
   .side.open{transform:translateY(0)}
   .side::before{display:none}
   .drawer-toggle{display:flex!important;position:sticky;top:0;left:0;right:0;width:100%;padding:14px 20px;background:var(--pk);border:none;cursor:pointer;align-items:center;justify-content:center;gap:10px;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:900;color:#fff;letter-spacing:.03em;border-radius:16px 16px 0 0;z-index:1;touch-action:manipulation;box-shadow:none}
@@ -727,14 +728,11 @@ function renderHighRes(){
     CX.scale(scale, scale);
   } else if(is8Topper){
     var oversize = 1.49;
-    var newCW = Math.round(488 * oversize);
-    var newCH = Math.round(700 * oversize);
-    hiCV.width = newCW * scale;
-    hiCV.height = newCH * scale;
+    hiCV.width = Math.round(488 * scale * oversize);
+    hiCV.height = Math.round(700 * scale * oversize);
     CV = hiCV;
     CX = hiCV.getContext('2d');
-    CW = newCW; CH = newCH;
-    CX.scale(scale, scale);
+    CX.scale(scale * oversize, scale * oversize);
   } else if(isUploadA4){
     var undersize = 0.826;
     hiCV.width = Math.round(CW * scale * undersize);
@@ -803,12 +801,9 @@ function showPrintPreview(){
       CX.translate(488*scale,0);CX.rotate(Math.PI/2);CX.scale(scale,scale);
     }else if(is8Topper){
       var oversize=1.49;
-      var newCW=Math.round(488*oversize);
-      var newCH=Math.round(700*oversize);
-      pCV.width=newCW*scale;pCV.height=newCH*scale;
+      pCV.width=Math.round(488*scale*oversize);pCV.height=Math.round(700*scale*oversize);
       CV=pCV;CX=pCV.getContext('2d');
-      CW=newCW;CH=newCH;
-      CX.scale(scale,scale);
+      CX.scale(scale*oversize,scale*oversize);
     }else if(isUploadA4){
       var undersize=0.826;
       pCV.width=Math.round(CW*scale*undersize);pCV.height=Math.round(CH*scale*undersize);
