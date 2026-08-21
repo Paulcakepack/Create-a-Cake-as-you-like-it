@@ -81,6 +81,11 @@ body.layout-4 .upload-only-ctrl{display:flex!important}
 .txt-rotate-sec{display:none!important}
 body.layout-4 .txt-rotate-sec{display:flex!important}
 body.layout-4 div.sec.txt-rotate-sec{display:block!important}
+.txt-suggestions{background:#fff;border:1.5px solid var(--pk);border-radius:8px;margin-top:6px;max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(233,30,140,0.15);z-index:100;-webkit-overflow-scrolling:touch}
+.txt-suggestion{padding:10px 14px;cursor:pointer;border-bottom:1px solid #fce4ef;font-size:13px;color:#333;font-family:'Nunito',Arial,sans-serif;transition:background .15s;touch-action:manipulation}
+.txt-suggestion:last-child{border-bottom:none}
+.txt-suggestion:hover,.txt-suggestion:active{background:var(--pklt)}
+.txt-suggestion strong{color:var(--pk);font-weight:900}
 .preview-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .preview-overlay.show{display:flex}
 .preview-inner{max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -332,7 +337,8 @@ body.layout-4 div.sec.txt-rotate-sec{display:block!important}
       <span id="txtLayerLabel">Line 1 text</span>
       <span id="l2CupcakeNote" style="font-size:9px;font-weight:600;color:#aaa;display:none"> · not on cupcakes</span>
     </div>
-    <input class="ti" id="inTxt" type="text" placeholder="Type your text here">
+    <input class="ti" id="inTxt" type="text" placeholder="Type your text here" autocomplete="off">
+    <div id="txtSuggestions" class="txt-suggestions" style="display:none"></div>
     <button class="rmv-btn" id="clearBtnTxt" style="display:none;margin-bottom:6px" onclick="clearActive()">✕ Clear this line</button>
 
     <div class="sec">Font</div>
@@ -541,6 +547,48 @@ function setFont(el,f){saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';T()[l
 function adjFS(d){saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';var key=layer+'fs';T()[key]=Math.max(10,Math.min(100,(T()[key]||36)+d));var v=ge('vFS');if(v)v.textContent=T()[key]+'px';var sl=ge('fsSlider');if(sl)sl.value=T()[key];draw();}
 function adjFSSlider(val){var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer+'fs']=parseInt(val);var v=ge('vFS');if(v)v.textContent=val+'px';draw();}
 function setPhrase(phrase){var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer]=phrase;var inp=ge('inTxt');if(inp)inp.value=phrase;var cb=ge('clearBtnTxt');if(cb)cb.style.display='flex';saveHist();draw();}
+
+var CELEBRATION_PHRASES=[
+'Happy Birthday','Happy 1st Birthday','Happy 2nd Birthday','Happy 3rd Birthday','Happy 4th Birthday','Happy 5th Birthday','Happy 6th Birthday','Happy 7th Birthday','Happy 8th Birthday','Happy 9th Birthday','Happy 10th Birthday','Happy 11th Birthday','Happy 12th Birthday','Happy 13th Birthday','Happy 14th Birthday','Happy 15th Birthday','Happy 16th Birthday','Happy 17th Birthday','Happy 18th','Happy 21st','Happy 25th','Happy 30th','Happy 40th','Happy 50th','Happy 60th','Happy 65th','Happy 70th','Happy 75th','Happy 80th','Happy 85th','Happy 90th','Happy 100th','Birthday Wishes','Birthday Boy','Birthday Girl',
+'Christening Day','God Bless','Baptism Day','Welcome Little One','Baby Blessings',
+'First Holy Communion','Communion Day','Holy Communion','Confirmation Day',"God's Blessings",
+'Congratulations','Congrats','Mr & Mrs','Just Married','Getting Married','Engaged','Save the Date','Bride to Be','Hen Party','Stag Party',
+'Happy Anniversary','1st Anniversary','5th Anniversary','10th Anniversary','15th Anniversary','20th Anniversary','25th Silver Anniversary','30th Anniversary','40th Ruby Anniversary','50th Golden Anniversary','60th Diamond Anniversary',
+'Welcome Baby','New Arrival','Baby Shower',"It's a Boy","It's a Girl",'Gender Reveal','Baby Boy','Baby Girl','Naming Day',
+'Well Done','Good Luck','Thank You','Retirement','Happy Retirement','Farewell','Best Wishes','You Did It','Nailed It',
+'Merry Christmas','Happy Christmas','Happy Easter','Happy Halloween',"Valentine's Day","Mother's Day","Father's Day",'Happy New Year',"St. Patrick's Day",'Happy Diwali','Eid Mubarak','Hanukkah',
+'Graduation Day','Class of 2026','Class of 2027','Happy Graduation','Well Done Graduate','Graduate',
+'In Loving Memory','Rest in Peace','Forever in Our Hearts','Always Remembered',
+'Welcome Home','Bon Voyage','Good Luck in New Job','Housewarming','New Home','New Baby','New Puppy','Get Well Soon'
+];
+
+function showSuggestions(){
+  var inp=ge('inTxt');var box=ge('txtSuggestions');if(!inp||!box)return;
+  var q=(inp.value||'').trim().toLowerCase();
+  if(q.length<1){box.style.display='none';return;}
+  var matches=CELEBRATION_PHRASES.filter(function(p){return p.toLowerCase().indexOf(q)!==-1;});
+  if(matches.length===0){box.style.display='none';return;}
+  var esc=function(s){return s.replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  box.innerHTML=matches.slice(0,7).map(function(p){
+    var display=esc(p).replace(re,'<strong>$1</strong>');
+    var attr=esc(p);
+    return '<div class="txt-suggestion" onclick="pickSuggestion(\''+attr.replace(/'/g,"\\'")+'\')">'+display+'</div>';
+  }).join('');
+  box.style.display='block';
+}
+
+function pickSuggestion(phrase){
+  var inp=ge('inTxt');if(!inp)return;
+  inp.value=phrase;
+  var layer=S.activeLayer==='l2'?'l2':'l1';
+  T()[layer]=phrase;
+  var cb=ge('clearBtnTxt');if(cb)cb.style.display='flex';
+  var box=ge('txtSuggestions');if(box)box.style.display='none';
+  saveHist();draw();
+}
+
+function hideSuggestions(){setTimeout(function(){var box=ge('txtSuggestions');if(box)box.style.display='none';},200);}
 function setArch(dir){var layer=S.activeLayer==='l2'?'l2':'l1';saveHist();S_archDir[layer]=dir;var bk=layer+'bend',ck=layer+'curve';if(dir===0){T()[bk]=0;T()[ck]=0;}else if(!T()[bk]){T()[bk]=1;T()[ck]=dir;}else{T()[ck]=dir*Math.abs(T()[bk]);}syncArchBtns(layer);draw();}
 function moreArch(){var layer=S.activeLayer==='l2'?'l2':'l1';if(S_archDir[layer]===0){setArch(1);return;}saveHist();var bk=layer+'bend',ck=layer+'curve';T()[bk]=Math.min(10,(T()[bk]||0)+1);T()[ck]=S_archDir[layer]*T()[bk];draw();}
 function lessArch(){var layer=S.activeLayer==='l2'?'l2':'l1';saveHist();var bk=layer+'bend',ck=layer+'curve';T()[bk]=Math.max(0,(T()[bk]||0)-1);if(!T()[bk]){S_archDir[layer]=0;T()[ck]=0;}else T()[ck]=S_archDir[layer]*T()[bk];syncArchBtns(layer);draw();}
@@ -870,8 +918,9 @@ window.addEventListener('load',function(){
   ge('fiMain').addEventListener('change',function(){loadImg(this.files[0]);this.value='';});
   ge('dzMain').addEventListener('dragover',function(e){e.preventDefault();});
   ge('dzMain').addEventListener('drop',function(e){e.preventDefault();loadImg(e.dataTransfer.files[0]);});
-  ge('inTxt').addEventListener('input',function(){var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer]=this.value;var cb=ge('clearBtnTxt');if(cb)cb.style.display=this.value.length>0?'flex':'none';draw();});
-  ge('inTxt').addEventListener('blur',saveHist);
+  ge('inTxt').addEventListener('input',function(){var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer]=this.value;var cb=ge('clearBtnTxt');if(cb)cb.style.display=this.value.length>0?'flex':'none';showSuggestions();draw();});
+  ge('inTxt').addEventListener('blur',function(){saveHist();hideSuggestions();});
+  ge('inTxt').addEventListener('focus',function(){if(this.value)showSuggestions();});
   document.querySelectorAll('#palTxt .sw').forEach(function(sw){sw.addEventListener('click',function(){document.querySelectorAll('#palTxt .sw').forEach(function(s){s.classList.remove('s');});sw.classList.add('s');saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer+'color']=sw.dataset.col;draw();});});
   document.querySelectorAll('#palOutline .sw').forEach(function(sw){sw.addEventListener('click',function(){document.querySelectorAll('#palOutline .sw').forEach(function(s){s.classList.remove('s');});sw.classList.add('s');saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer+'outline']=sw.dataset.outline;draw();});});
   var cv=ge('cv');cv.style.cursor='grab';
