@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Create A Cake</title>
+<style>
+:root{--pk:#e91e8c;--pklt:#fce4ef;--dark:#1a1a1a;--bg:#2a2a2a;--panel:#3a3a3a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#fff;font-family:'Nunito',Arial,sans-serif;min-height:100vh;padding:20px}
+.header{text-align:center;margin-bottom:20px}
+.header h1{color:var(--pk);font-size:24px;font-weight:900;margin-bottom:6px}
+.header p{color:#aaa;font-size:13px}
+.controls{background:var(--panel);border-radius:12px;padding:16px;margin-bottom:20px;max-width:900px;margin-left:auto;margin-right:auto}
+.control-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-bottom:12px}
+.control-row:last-child{margin-bottom:0}
+.control-label{color:#ccc;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+.device-btn{background:#fff;color:var(--dark);border:2px solid transparent;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s}
+.device-btn:hover{border-color:var(--pk)}
+.device-btn.active{background:var(--pk);color:#fff;border-color:var(--pk)}
+.orientation-btn{background:#555;color:#fff;border:2px solid transparent;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s}
+.orientation-btn:hover{border-color:var(--pk)}
+.orientation-btn.active{background:var(--pk);color:#fff}
+.url-input{background:#fff;color:var(--dark);border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;flex:1;min-width:280px;max-width:500px}
+.reload-btn{background:var(--pk);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.stage{display:flex;justify-content:center;align-items:flex-start;padding:20px 0}
+.phone-frame{position:relative;background:#111;border-radius:36px;padding:12px 12px;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 2px #444;transition:all .3s}
+.phone-frame::before{content:'';position:absolute;top:16px;left:50%;transform:translateX(-50%);width:60px;height:6px;background:#333;border-radius:6px;z-index:2}
+.phone-frame.landscape::before{top:50%;left:16px;transform:translateY(-50%) rotate(90deg)}
+.screen{background:#fff;border-radius:24px;overflow:hidden;position:relative}
+.screen iframe{border:none;display:block;width:100%;height:100%;background:#fff}
+.info-bar{text-align:center;margin-top:14px;color:#aaa;font-size:11px}
+.info-bar strong{color:#fff;font-weight:800}
+.footer-note{text-align:center;color:#888;font-size:11px;margin-top:20px;padding:12px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📱 Create A Cake — Device Preview</h1>
+  <p>Test how your app looks on different phones and tablets</p>
+</div>
+
+<div class="controls">
+  <div class="control-row">
+    <span class="control-label">Device:</span>
+    <button class="device-btn active" data-w="375" data-h="667" data-name="iPhone SE / 8">iPhone SE / 8</button>
+    <button class="device-btn" data-w="390" data-h="844" data-name="iPhone 14/15">iPhone 14/15</button>
+    <button class="device-btn" data-w="430" data-h="932" data-name="iPhone 15 Pro Max">iPhone Pro Max</button>
+    <button class="device-btn" data-w="360" data-h="800" data-name="Samsung Galaxy S22">Samsung S22</button>
+    <button class="device-btn" data-w="412" data-h="915" data-name="Samsung Galaxy S23 Ultra">Samsung Ultra</button>
+    <button class="device-btn" data-w="393" data-h="873" data-name="Google Pixel 7">Pixel 7</button>
+    <button class="device-btn" data-w="768" data-h="1024" data-name="iPad Mini">iPad Mini</button>
+  </div>
+  <div class="control-row">
+    <span class="control-label">Orientation:</span>
+    <button class="orientation-btn active" id="portraitBtn">📱 Portrait</button>
+    <button class="orientation-btn" id="landscapeBtn">📱 Landscape</button>
+  </div>
+  <div class="control-row">
+    <span class="control-label">URL:</span>
+    <input type="text" class="url-input" id="urlInput" value="./index.html">
+    <button class="reload-btn" onclick="reloadFrame()">🔄 Reload</button>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="phone-frame" id="phoneFrame">
+    <div class="screen" id="screen">
+      <iframe id="appFrame" src="./index.html"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="info-bar">
+  Currently showing: <strong id="deviceName">iPhone SE / 8</strong> — 
+  <strong id="dimensions">375 × 667</strong> px
+</div>
+
+<div class="footer-note">
+  💡 <strong>Tip:</strong> This preview shows the app at real phone screen dimensions. 
+  Font rendering may look slightly different from an actual iOS or Android device, 
+  but the layout and touch targets are accurate.
+</div>
+
+<script>
+var currentW = 375, currentH = 667, currentName = 'iPhone SE / 8', isLandscape = false;
+
+function updateFrame() {
+  var frame = document.getElementById('phoneFrame');
+  var screen = document.getElementById('screen');
+  var iframe = document.getElementById('appFrame');
+  var w = isLandscape ? currentH : currentW;
+  var h = isLandscape ? currentW : currentH;
+  screen.style.width = w + 'px';
+  screen.style.height = h + 'px';
+  iframe.style.width = w + 'px';
+  iframe.style.height = h + 'px';
+  frame.classList.toggle('landscape', isLandscape);
+  document.getElementById('deviceName').textContent = currentName;
+  document.getElementById('dimensions').textContent = w + ' × ' + h;
+}
+
+document.querySelectorAll('.device-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.device-btn').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    currentW = parseInt(this.dataset.w);
+    currentH = parseInt(this.dataset.h);
+    currentName = this.dataset.name;
+    updateFrame();
+  });
+});
+
+document.getElementById('portraitBtn').addEventListener('click', function() {
+  isLandscape = false;
+  document.getElementById('portraitBtn').classList.add('active');
+  document.getElementById('landscapeBtn').classList.remove('active');
+  updateFrame();
+});
+
+document.getElementById('landscapeBtn').addEventListener('click', function() {
+  isLandscape = true;
+  document.getElementById('landscapeBtn').classList.add('active');
+  document.getElementById('portraitBtn').classList.remove('active');
+  updateFrame();
+});
+
+function reloadFrame() {
+  var iframe = document.getElementById('appFrame');
+  var url = document.getElementById('urlInput').value || './index.html';
+  iframe.src = url + (url.indexOf('?') > -1 ? '&' : '?') + '_r=' + Date.now();
+}
+
+updateFrame();
+</script>
+</body>
+</html>
