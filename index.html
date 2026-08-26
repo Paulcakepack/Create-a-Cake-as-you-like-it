@@ -715,6 +715,7 @@ function renderHighRes(){
   var hiCV=document.createElement('canvas');
   var isCupcakeSheet = S.layoutIdx === 3;
   var isUploadA4 = S.layoutIdx === 4;
+  var isMixSheet = S.layoutIdx === 2;
   var origCV=CV, origCX=CX;
   var origCW=CW, origCH=CH;
   if(isCupcakeSheet){
@@ -732,6 +733,13 @@ function renderHighRes(){
     CV = hiCV;
     CX = hiCV.getContext('2d');
     CX.scale(scale * undersize, scale * undersize);
+  } else if(isMixSheet){
+    var mixOversize = 1.27;
+    hiCV.width = Math.round(CW * scale * mixOversize);
+    hiCV.height = Math.round(CH * scale * mixOversize);
+    CV = hiCV;
+    CX = hiCV.getContext('2d');
+    CX.scale(scale * mixOversize, scale * mixOversize);
   } else {
     hiCV.width = CW * scale;
     hiCV.height = CH * scale;
@@ -784,6 +792,7 @@ function showPrintPreview(){
     var pCV=document.createElement('canvas');
     var isCupcakeSheet=S.layoutIdx===3;
     var isUploadA4=S.layoutIdx===4;
+    var isMixSheet=S.layoutIdx===2;
     var origCV=CV,origCX=CX;
     var origCW=CW,origCH=CH;
     if(isCupcakeSheet){
@@ -795,6 +804,11 @@ function showPrintPreview(){
       pCV.width=Math.round(CW*scale*undersize);pCV.height=Math.round(CH*scale*undersize);
       CV=pCV;CX=pCV.getContext('2d');
       CX.scale(scale*undersize,scale*undersize);
+    }else if(isMixSheet){
+      var mixOversize=1.27;
+      pCV.width=Math.round(CW*scale*mixOversize);pCV.height=Math.round(CH*scale*mixOversize);
+      CV=pCV;CX=pCV.getContext('2d');
+      CX.scale(scale*mixOversize,scale*mixOversize);
     }else{
       pCV.width=CW*scale;pCV.height=CH*scale;
       CV=pCV;CX=pCV.getContext('2d');CX.scale(scale,scale);
