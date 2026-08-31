@@ -241,7 +241,7 @@ body.layout-4 div.sec.txt-rotate-sec{display:block!important}
     <div class="lopt" id="lo1" onclick="pickLayoutAndAdvance(this,1)">
       <div class="lopt-preview" id="lp1"></div>
       <div style="flex:1">
-        <div class="lopt-title">🎂🎂 Two 6" Toppers</div>
+        <div class="lopt-title">🎂🎂 Two 5.5" Toppers</div>
         <div class="lopt-desc">Two toppers — own image &amp; text each</div>
       </div>
       <div style="font-size:18px;color:#ddd">›</div>
@@ -250,7 +250,7 @@ body.layout-4 div.sec.txt-rotate-sec{display:block!important}
       <div class="lopt-preview" id="lp2"></div>
       <div style="flex:1">
         <div class="lopt-title">🎂 + 🧁×8 Mix Sheet</div>
-        <div class="lopt-desc">One 6" topper &amp; 8 cupcake toppers</div>
+        <div class="lopt-desc">One 5.5" topper &amp; 8 cupcake toppers</div>
       </div>
       <div style="font-size:18px;color:#ddd">›</div>
     </div>
@@ -500,7 +500,7 @@ body.layout-4 div.sec.txt-rotate-sec{display:block!important}
 
 <script>
 /* Shopify variant ID for Edible Prints - No editing product */
-var SHOPIFY_VARIANT_ID = 33015207002215;
+var SHOPIFY_VARIANT_ID = 65528494784861;
 
 /* Cloudinary config for design image uploads */
 var CLOUDINARY_CLOUD_NAME = 'zxrbfidt';
@@ -515,8 +515,8 @@ var HISTORY=[];
 function saveHist(){HISTORY.push(JSON.stringify(S));if(HISTORY.length>40)HISTORY.shift();}
 var LAYOUTS=[
   {label:'8" Cake Topper',cols:1,rows:1,count:1,mixed:false,twoUp:false},
-  {label:'Two 6" Toppers',cols:1,rows:2,count:2,mixed:false,twoUp:true},
-  {label:'Mix Sheet (6"+8×cupcake)',cols:0,rows:0,count:9,mixed:true,twoUp:false},
+  {label:'Two 5.5" Toppers',cols:1,rows:2,count:2,mixed:false,twoUp:true},
+  {label:'Mix Sheet (5.5"+8×cupcake)',cols:0,rows:0,count:9,mixed:true,twoUp:false},
   {label:'20× Cupcake Sheet',cols:5,rows:4,count:20,mixed:false,twoUp:false},
   {label:'Upload Ready-Made Print',cols:1,rows:1,count:1,mixed:false,twoUp:false,uploadOnly:true},
 ];
@@ -597,7 +597,7 @@ function syncArchBtns(layer){var t=T(),bk=layer+'bend';var off=ge('archOff'),up=
 function moveTxt(dx,dy){var layer=S.activeLayer==='l2'?'l2':'l1';var xk=layer+'x', yk=layer+'y';var defY=layer==='l1'?320:400;saveHist();T()[xk]=Math.max(10,Math.min(CW-10,(T()[xk]||244)+dx*10));T()[yk]=Math.max(10,Math.min(CH-10,(T()[yk]||defY)+dy*10));draw();}
 
 function drawPreviews(){function dc(ctx,cx,cy,r,lbl){ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='rgba(233,30,140,0.18)';ctx.fill();ctx.strokeStyle='#e91e8c';ctx.lineWidth=1.2;ctx.stroke();if(lbl&&r>6){ctx.fillStyle='#e91e8c';ctx.font='bold '+(Math.min(7,r*.55))+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lbl,cx,cy);}ctx.restore();}
-LAYOUTS.forEach(function(L,i){var wrap=ge('lp'+i);if(!wrap)return;wrap.innerHTML='';var cv=document.createElement('canvas');cv.width=100;cv.height=140;wrap.appendChild(cv);var ctx=cv.getContext('2d'),W=100,H=140,pad=4;ctx.fillStyle='#fafafa';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.strokeRect(.5,.5,W-1,H-1);if(L.uploadOnly){var pgP=8,pgX=pgP,pgY=pgP,pgW=W-pgP*2,pgH=H-pgP*2;ctx.fillStyle='rgba(233,30,140,0.15)';ctx.fillRect(pgX,pgY,pgW,pgH);ctx.strokeStyle='#e91e8c';ctx.lineWidth=1.5;ctx.strokeRect(pgX+.5,pgY+.5,pgW-1,pgH-1);ctx.fillStyle='#e91e8c';ctx.beginPath();var ax=W/2,ay=H*0.5;ctx.moveTo(ax,ay-18);ctx.lineTo(ax-14,ay-2);ctx.lineTo(ax-6,ay-2);ctx.lineTo(ax-6,ay+14);ctx.lineTo(ax+6,ay+14);ctx.lineTo(ax+6,ay-2);ctx.lineTo(ax+14,ay-2);ctx.closePath();ctx.fill();ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('A4',W/2,H*0.85);}else if(L.mixed){var tH=Math.round(H*.5),bR=(Math.min(W-pad*2,tH-pad*2))/2;dc(ctx,W/2,pad+tH/2,bR,'6"');var bC=4,bR2=2,bG=3,bw=(W-pad*2-bG*(bC-1))/bC,bh=(H-tH-pad-bG*(bR2-1))/bR2;for(var r=0;r<bR2;r++)for(var c=0;c<bC;c++)dc(ctx,pad+c*(bw+bG)+bw/2,tH+pad/2+r*(bh+bG)+bh/2,Math.min(bw,bh)/2*.82,'2"');}else{var cols=L.cols||1,rows=L.rows||1,gp=3,cw=(W-pad*2-gp*(cols-1))/cols,ch=(H-pad*2-gp*(rows-1))/rows;var lbl=i===0?'8"':i===1?'6"':i===3?'2"':'';for(var r2=0;r2<rows;r2++)for(var c2=0;c2<cols;c2++)dc(ctx,pad+c2*(cw+gp)+cw/2,pad+r2*(ch+gp)+ch/2,Math.min(cw,ch)/2*.82,lbl);}});}
+LAYOUTS.forEach(function(L,i){var wrap=ge('lp'+i);if(!wrap)return;wrap.innerHTML='';var cv=document.createElement('canvas');cv.width=100;cv.height=140;wrap.appendChild(cv);var ctx=cv.getContext('2d'),W=100,H=140,pad=4;ctx.fillStyle='#fafafa';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.strokeRect(.5,.5,W-1,H-1);if(L.uploadOnly){var pgP=8,pgX=pgP,pgY=pgP,pgW=W-pgP*2,pgH=H-pgP*2;ctx.fillStyle='rgba(233,30,140,0.15)';ctx.fillRect(pgX,pgY,pgW,pgH);ctx.strokeStyle='#e91e8c';ctx.lineWidth=1.5;ctx.strokeRect(pgX+.5,pgY+.5,pgW-1,pgH-1);ctx.fillStyle='#e91e8c';ctx.beginPath();var ax=W/2,ay=H*0.5;ctx.moveTo(ax,ay-18);ctx.lineTo(ax-14,ay-2);ctx.lineTo(ax-6,ay-2);ctx.lineTo(ax-6,ay+14);ctx.lineTo(ax+6,ay+14);ctx.lineTo(ax+6,ay-2);ctx.lineTo(ax+14,ay-2);ctx.closePath();ctx.fill();ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('A4',W/2,H*0.85);}else if(L.mixed){var tH=Math.round(H*.5),bR=(Math.min(W-pad*2,tH-pad*2))/2;dc(ctx,W/2,pad+tH/2,bR,'5.5"');var bC=4,bR2=2,bG=3,bw=(W-pad*2-bG*(bC-1))/bC,bh=(H-tH-pad-bG*(bR2-1))/bR2;for(var r=0;r<bR2;r++)for(var c=0;c<bC;c++)dc(ctx,pad+c*(bw+bG)+bw/2,tH+pad/2+r*(bh+bG)+bh/2,Math.min(bw,bh)/2*.82,'2"');}else{var cols=L.cols||1,rows=L.rows||1,gp=3,cw=(W-pad*2-gp*(cols-1))/cols,ch=(H-pad*2-gp*(rows-1))/rows;var lbl=i===0?'8"':i===1?'5.5"':i===3?'2"':'';for(var r2=0;r2<rows;r2++)for(var c2=0;c2<cols;c2++)dc(ctx,pad+c2*(cw+gp)+cw/2,pad+r2*(ch+gp)+ch/2,Math.min(cw,ch)/2*.82,lbl);}});}
 
 function getPreviewGeometry(layoutMode){
   var thumbSize=layoutMode==='cupcake'?100:120;
@@ -742,7 +742,7 @@ function renderHighRes(){
     CX = hiCV.getContext('2d');
     CX.scale(scale * mixOversize, scale * mixOversize);
   } else if(isTwo6){
-    var two6Oversize = 1.37;
+    var two6Oversize = 1.60;
     hiCV.width = Math.round(CW * scale * two6Oversize);
     hiCV.height = Math.round(CH * scale * two6Oversize);
     CV = hiCV;
@@ -819,7 +819,7 @@ function showPrintPreview(){
       CV=pCV;CX=pCV.getContext('2d');
       CX.scale(scale*mixOversize,scale*mixOversize);
     }else if(isTwo6){
-      var two6Oversize=1.37;
+      var two6Oversize=1.60;
       pCV.width=Math.round(CW*scale*two6Oversize);pCV.height=Math.round(CH*scale*two6Oversize);
       CV=pCV;CX=pCV.getContext('2d');
       CX.scale(scale*two6Oversize,scale*two6Oversize);
