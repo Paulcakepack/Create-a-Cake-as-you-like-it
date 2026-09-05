@@ -812,7 +812,7 @@ function renderHighRes(){
     CX.rotate(Math.PI/2);
     CX.scale(scale, scale);
   } else if(isUploadA4 || isCollage){
-    var undersize = 0.826;
+    var undersize = 0.856;
     hiCV.width = Math.round(CW * scale * undersize);
     hiCV.height = Math.round(CH * scale * undersize);
     CV = hiCV;
@@ -894,7 +894,7 @@ function showPrintPreview(){
       CV=pCV;CX=pCV.getContext('2d');
       CX.translate(488*scale,0);CX.rotate(Math.PI/2);CX.scale(scale,scale);
     }else if(isUploadA4 || isCollage){
-      var undersize=0.826;
+      var undersize=0.856;
       pCV.width=Math.round(CW*scale*undersize);pCV.height=Math.round(CH*scale*undersize);
       CV=pCV;CX=pCV.getContext('2d');
       CX.scale(scale*undersize,scale*undersize);
@@ -1034,3 +1034,4 @@ window.addEventListener('load',function(){
 </script>
 </body>
 </html>
+
