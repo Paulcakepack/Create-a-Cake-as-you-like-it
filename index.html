@@ -955,4 +955,79 @@ function proceedWithAddToCart(){
     var fontClean=(t.l1font||'Dancing Script').replace(/'/g,'').replace(/,.*$/,'').trim();
     var isUploadOnly=S.layoutIdx===4;
     var isCollageLayout=S.layoutIdx===5;
-    va
+    var note;
+    if(isUploadOnly){note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Customer supplied ready-made design';}
+    else if(isCollageLayout){var paW=CW*(200/210);var mmPerPx=200/paW;var sizes=S.collage.map(function(im,i){var wMm=Math.round(im.w*mmPerPx),hMm=Math.round(im.h*mmPerPx);return '#'+(i+1)+':'+wMm+'x'+hMm+'mm';}).join(', ');var txtBit=(t.l1||t.l2)?' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+fontClean:'';note='Layout: '+LAYOUTS[S.layoutIdx].label+' | '+S.collage.length+' images | Sizes: '+sizes+txtBit;}
+    else{note='Layout: '+LAYOUTS[S.layoutIdx].label+' | Line 1: '+(t.l1||'none')+' | Line 2: '+(t.l2||'none')+' | Font: '+fontClean;}
+    var properties={
+      '_Design URL':imageUrl,
+      '_Design Notes':note,
+      'Layout':LAYOUTS[S.layoutIdx].label
+    };
+    if(!isUploadOnly){
+      properties['Line 1']=t.l1||'(none)';
+      properties['Line 2']=t.l2||'(none)';
+      properties['Font']=fontClean;
+    }
+    var payload={
+      variantId:SHOPIFY_VARIANT_ID,
+      quantity:1,
+      properties:properties
+    };
+    function fail(){b.textContent='ADD TO CART — €5.00';b.style.background='';b.disabled=false;alert('Sorry, there was an error adding to cart. Please try again.');}
+    function success(){b.textContent='✓ Added to cart!';b.style.background='#2e9e6b';if(!inIframe){setTimeout(function(){window.location.href='/cart';},1500);}}
+    var inIframe=false;
+    try{inIframe=(window.parent&&window.parent!==window);}catch(e){inIframe=true;}
+    if(inIframe){
+      var timer;
+      var handler=function(ev){if(!ev.data||ev.data.type!=='cake-cart-result')return;window.removeEventListener('message',handler);if(timer)clearTimeout(timer);if(ev.data.ok)success();else fail();};
+      window.addEventListener('message',handler);
+      timer=setTimeout(function(){window.removeEventListener('message',handler);fail();},10000);
+      try{window.parent.postMessage({type:'cake-add-to-cart',payload:payload},'*');}catch(e){window.removeEventListener('message',handler);clearTimeout(timer);fail();}
+      return;
+    }
+    fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{id:payload.variantId,quantity:1,properties:payload.properties}]})}).then(function(r){return r.json();}).then(function(data){if(data.items||data.id)success();else throw new Error('Cart error');}).catch(fail);
+  }
+}
+
+function ge(id){return document.getElementById(id);}
+var _drawerOpen=false;
+function toggleDrawer(){if(_drawerOpen)closeDrawer();else openDrawer();}
+function openDrawer(){_drawerOpen=true;var side=ge('sideDrawer');if(side){side.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';side.style.transform='translateY(0)';side.classList.add('open');}var lbl=ge('drawerLabel');if(lbl)lbl.textContent='⋮⋮ Drag for more options';updateFab();}
+function closeDrawer(){_drawerOpen=false;var side=ge('sideDrawer');if(side){side.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';side.style.transform='translateY(calc(100% - 56px))';side.classList.remove('open');}updateFab();}
+function updateFab(){var fab=ge('fabTools');var closeBtn=ge('fabClose');if(fab){if(!isMobile()){fab.style.display='none';}else{fab.style.display=_drawerOpen?'none':'flex';}}if(closeBtn){if(!isMobile()){closeBtn.classList.remove('show');}else{closeBtn.classList.toggle('show',_drawerOpen);}}}
+function initDrawerDrag(){var toggle=ge('drawerToggle');var side=ge('sideDrawer');if(!toggle||!side)return;var startY,startTranslate,dragging=false,moved=false;function getTranslate(){var style=window.getComputedStyle(side);var mat=new DOMMatrix(style.transform);return mat.m42;}function onStart(e){if(!isMobile())return;var touch=e.touches?e.touches[0]:e;startY=touch.clientY;startTranslate=getTranslate();dragging=true;moved=false;side.style.transition='none';e.stopPropagation();}function onMove(e){if(!dragging||!isMobile())return;var touch=e.touches?e.touches[0]:e;var dy=touch.clientY-startY;if(Math.abs(dy)>4)moved=true;var newY=Math.max(-window.innerHeight*0.85,Math.min(window.innerHeight*0.88,startTranslate+dy));side.style.transform='translateY('+newY+'px)';e.preventDefault();}function onEnd(e){if(!dragging||!isMobile())return;dragging=false;side.style.transition='';if(!moved){toggleDrawer();}var currentY=getTranslate();_drawerOpen=currentY<window.innerHeight*0.7;}toggle.addEventListener('touchstart',onStart,{passive:true});toggle.addEventListener('touchmove',onMove,{passive:false});toggle.addEventListener('touchend',onEnd);toggle.addEventListener('mousedown',onStart);window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onEnd);}
+function isMobile(){return window.innerWidth<=480;}
+function initMobile(){if(!isMobile())return;var toggle=ge('drawerToggle');var hint=ge('mobileHint');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display='flex';if(nav){nav.style.display='flex';var pv=document.querySelector('.pv');if(pv&&pv.parentNode&&nav.parentNode!==pv.parentNode){pv.parentNode.insertBefore(nav,pv.nextSibling);}}if(hint){hint.style.display='block';setTimeout(function(){hint.style.display='none';},4500);}initDrawerDrag();updateMobileNav();updateFab();}
+function initNavAutoHide(){var drawer=ge('sideDrawer');var nav=ge('mobileStickyNav');if(!drawer||!nav)return;var lastScroll=drawer.scrollTop||0;var scrollTimer;function onScroll(){var current=drawer.scrollTop||window.scrollY||document.documentElement.scrollTop||0;if(current<=10){nav.classList.remove('hidden');}else if(current>lastScroll+3){nav.classList.add('hidden');}else if(current<lastScroll-3){nav.classList.remove('hidden');}lastScroll=current;clearTimeout(scrollTimer);scrollTimer=setTimeout(function(){nav.classList.remove('hidden');},1500);}
+drawer.addEventListener('scroll',onScroll,{passive:true});
+window.addEventListener('scroll',onScroll,{passive:true});
+document.addEventListener('touchmove',onScroll,{passive:true});}
+function updateMobileNav(){if(!isMobile())return;var nav=ge('mobileStickyNav');var bk=ge('mobBk');var nx=ge('mobNx');if(!nav||!bk||!nx)return;var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;if(step===0){bk.style.display='none';nx.textContent='Start Designing →';nx.style.flex='1';}else if(step===1){bk.style.display='';bk.textContent="← Template";nx.textContent='Finalise Order →';nx.style.background='var(--pk)';nx.style.flex='2';}else{bk.style.display='';bk.textContent='← Design';nx.textContent='ADD TO CART — €5.00';nx.style.background='#2e9e6b';nx.style.flex='2';}}
+function mobileBk(){var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;go(step-1);}
+function mobNxAction(){var step=0;if(ge('pn1')&&ge('pn1').classList.contains('a'))step=1;if(ge('pn2')&&ge('pn2').classList.contains('a'))step=2;if(step===2){confirmAndAdd();}else{go(step+1);}}
+window.addEventListener('resize',function(){var toggle=ge('drawerToggle');var nav=ge('mobileStickyNav');if(toggle)toggle.style.display=isMobile()?'flex':'none';if(nav)nav.style.display=isMobile()?'flex':'none';if(!isMobile()){var side=ge('sideDrawer');if(side){side.classList.remove('open');side.style.removeProperty('transform');}}updateMobileNav();updateFab();});
+
+window.addEventListener('load',function(){
+  CV=ge('cv');CX=CV.getContext('2d');
+  ge('fiMain').addEventListener('change',function(){loadImg(this.files[0]);this.value='';});
+  var fic=ge('fiCollage');if(fic)fic.addEventListener('change',function(){for(var i=0;i<this.files.length&&S.collage.length<15;i++){addCollageImage(this.files[i]);}this.value='';});
+  ge('dzMain').addEventListener('dragover',function(e){e.preventDefault();});
+  ge('dzMain').addEventListener('drop',function(e){e.preventDefault();loadImg(e.dataTransfer.files[0]);});
+  ge('inTxt').addEventListener('input',function(){var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer]=this.value;var cb=ge('clearBtnTxt');if(cb)cb.style.display=this.value.length>0?'flex':'none';showSuggestions();draw();});
+  ge('inTxt').addEventListener('blur',function(){saveHist();hideSuggestions();});
+  ge('inTxt').addEventListener('focus',function(){if(this.value)showSuggestions();});
+  document.querySelectorAll('#palTxt .sw').forEach(function(sw){sw.addEventListener('click',function(){document.querySelectorAll('#palTxt .sw').forEach(function(s){s.classList.remove('s');});sw.classList.add('s');saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer+'color']=sw.dataset.col;draw();});});
+  document.querySelectorAll('#palOutline .sw').forEach(function(sw){sw.addEventListener('click',function(){document.querySelectorAll('#palOutline .sw').forEach(function(s){s.classList.remove('s');});sw.classList.add('s');saveHist();var layer=S.activeLayer==='l2'?'l2':'l1';T()[layer+'outline']=sw.dataset.outline;draw();});});
+  var cv=ge('cv');cv.style.cursor='grab';
+  cv.addEventListener('mousedown',cvDown);cv.addEventListener('mousemove',cvMove);cv.addEventListener('mouseup',cvUp);cv.addEventListener('mouseleave',cvUp);
+  cv.addEventListener('touchstart',cvDown,{passive:false});
+  document.addEventListener('touchmove',function(e){if(!_drag.active&&!_pinch.active)return;cvMove(e);},{passive:false});
+  document.addEventListener('touchend',function(e){if(!_drag.active&&!_pinch.active)return;cvUp(e);});
+  document.addEventListener('touchcancel',function(){_drag.active=false;_pinch.active=false;});
+  document.addEventListener('touchstart',function(e){if((_drag.active||_pinch.active)&&e.touches&&e.touches.length>=2){e.preventDefault();_pinch.active=true;_drag.active=false;_pinch.startDist=pinchDist(e);_pinch.startZoom=T().imgZoom||1;}},{passive:false});
+  setTimeout(function(){document.body.classList.add('step-0');drawPreviews();var lo0=ge('lo0');if(lo0)pickLayout(lo0,0);saveHist();syncArchBtns('l1');syncArchBtns('l2');syncTools();updateZoomLbl();draw();showUploadZone();initMobile();var um=ge('unitMm');if(um)um.classList.add('s');updateCollageCount();},80);
+});
+</script>
+</body>
+</html>
